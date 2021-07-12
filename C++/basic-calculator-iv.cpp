@@ -12,7 +12,9 @@ public:
     Poly(const string& expr) {
         vector<string> key;
         if (is_number(expr)) {
-            polies_[key] = stoi(expr);
+            if (stoi(expr)) {
+                polies_[key] = stoi(expr);
+            }
         } else {
             key.emplace_back(expr);
             ++polies_[key];
@@ -96,11 +98,7 @@ private:
         vector<string> result;
         int i = 0, j = 0;
         while (i < arr1.size() || j < arr2.size()) {
-            if (j == arr2.size()) {
-                result.emplace_back(arr1[i++]);
-            } else if (i == arr1.size()) {
-                result.emplace_back(arr2[j++]);
-            } else if (arr1[i] < arr2[j]) {
+            if (j == arr2.size() || (i != arr1.size() && arr1[i] < arr2[j])) {
                 result.emplace_back(arr1[i++]);
             } else {
                 result.emplace_back(arr2[j++]);

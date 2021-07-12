@@ -11,35 +11,42 @@ import itertools
 import operator
 
 
+def clear(result):
+    to_remove = [k for k, v in result.iteritems() if v == 0]
+    for k in to_remove:
+        result.pop(k)
+
+
 class Poly(collections.Counter):
     def __init__(self, expr=None):
         if expr is None:
             return
         if expr.isdigit():
-            self.update({(): int(expr)})
+            if int(expr):
+                self.update({(): int(expr)})
         else:
             self[(expr,)] += 1
 
     def __add__(self, other):
-        self.update(other)
-        return self
+        result = Poly()
+        result.update(self)
+        result.update(other)
+        clear(result)
+        return result
 
     def __sub__(self, other):
-        self.update({k: -v for k, v in other.iteritems()})
-        return self
+        result = Poly()
+        result.update(self)
+        result.update({k: -v for k, v in other.iteritems()})
+        clear(result)
+        return result
 
     def __mul__(self, other):
         def merge(k1, k2):
             result = []
             i, j = 0, 0
             while i != len(k1) or j != len(k2):
-                if j == len(k2):
-                    result.append(k1[i])
-                    i += 1
-                elif i == len(k1):
-                    result.append(k2[j])
-                    j += 1
-                elif k1[i] < k2[j]:
+                if j == len(k2) or (i != len(k1) and k1[i] < k2[j]):
                     result.append(k1[i])
                     i += 1
                 else:
@@ -51,6 +58,7 @@ class Poly(collections.Counter):
         for k1, v1 in self.iteritems():
             for k2, v2 in other.iteritems():
                 result.update({tuple(merge(k1, k2)): v1*v2})
+        clear(result)
         return result
 
     def eval(self, lookup):
@@ -63,13 +71,13 @@ class Poly(collections.Counter):
                 else:
                     key.append(var)
             result[tuple(key)] += c
+        clear(result)
         return result
 
     def to_list(self):
         return ["*".join((str(v),) + k)
                 for k, v in sorted(self.iteritems(),
-                                   key=lambda x: (-len(x[0]), x[0]))
-                if v]
+                                   key=lambda x: (-len(x[0]), x[0]))]
 
 
 class Solution(object):
